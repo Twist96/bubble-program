@@ -1,0 +1,17 @@
+[features]
+seeds = false
+skip-lint = false
+skipPreflight = true
+pkg = { version = "^0.1.14", features = ["devnet"] }
+[programs.localnet]
+bb_nft = "23UbaEAHYvXWG3Af7BeVVsSDHfS3HcxHiWqSGrZR7S86"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Devnet"
+wallet = "/Users/matthewchukwuemeka/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
