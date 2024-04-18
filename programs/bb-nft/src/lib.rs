@@ -27,11 +27,15 @@ impl Id for MplBubblegum {
 pub mod bb_nft {
     use super::*;
 
-    pub fn create_faucet(ctx: Context<CreateFaucet>) -> Result<()> {
-        instructions::create_faucet(ctx)
+    // pub fn create_faucet(ctx: Context<CreateFaucet>) -> Result<()> {
+    //     instructions::create_faucet(ctx)
+    // }
+
+    pub fn create_tree(ctx: Context<CreateTree>, max_depth: u32, max_buffer_size: u32) -> Result<()> {
+        instructions::create_tree(ctx, max_depth, max_buffer_size)
     }
 
-    pub fn mint_cnft(ctx: Context<MintCNFT>) -> Result<()> {
-        instructions::mint_cnft(ctx)
+    pub fn mint_cnft(ctx: Context<MintCNFT>, name: String, symbol: String, uri: String) -> Result<()> {
+        instructions::mint_cnft(ctx, name, symbol, uri)
     }
 }

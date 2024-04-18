@@ -1,10 +1,7 @@
 use anchor_lang::prelude::*;
 use mpl_bubblegum::instructions::{CreateTreeConfigCpiBuilder};
-use crate::{MplBubblegum};
-// use mpl_bubblegum::instructions::MintV1CpiBuilder;
-// use mpl_bubblegum::instructions::*;
-// use mpl_bubblegum::accounts::*;
 use spl_account_compression::{program::SplAccountCompression, Noop};
+use crate::{MplBubblegum};
 
 pub fn create_tree(ctx: Context<CreateTree>, max_depth: u32, max_buffer_size: u32) -> Result<()> {
     CreateTreeConfigCpiBuilder::new(&ctx.accounts.mpl_bubblegum_program)
@@ -40,7 +37,7 @@ pub struct CreateTree<'info> {
     pub merkle_tree: UncheckedAccount<'info>,
 
     #[account(
-        seeds = [],
+        seeds = [b"tree_owner", merkle_tree.key().as_ref()],
         bump
     )]
     /// CHECK: This account used as a signing PDA only
