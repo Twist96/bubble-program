@@ -1,5 +1,4 @@
 import {AnchorProvider, Program, Wallet, web3} from "@coral-xyz/anchor";
-import * as fs from "fs";
 import idl from "../target/idl/bb_nft.json";
 import {BbNft, IDL} from "../target/types/bb_nft";
 import {
@@ -7,19 +6,24 @@ import {
     SPL_NOOP_PROGRAM_ID,
     ValidDepthSizePair
 } from "@solana/spl-account-compression";
-import {Keypair, PublicKey} from "@solana/web3.js";
+import { PublicKey} from "@solana/web3.js";
 import {MPL_BUBBLEGUM_PROGRAM_ID} from "@metaplex-foundation/mpl-bubblegum";
 import * as anchor from "@coral-xyz/anchor";
-import {loadWalletKey, umi} from "./utils";
-import {publicKey} from "@metaplex-foundation/umi";
+import {keypairFromSecret, keypairSignerFromSecret, loadWalletKey, umi} from "./utils";
+import {
+    KeypairSigner,
+    percentAmount,
+    publicKey
+} from "@metaplex-foundation/umi";
+import {createNft} from "@metaplex-foundation/mpl-token-metadata";
 
-let solanaURL = "https://api.devnet.solana.com" // "http://localhost:8899"
+let solanaURL = "https://api.devnet.solana.com"
 
 const connection = new web3.Connection(solanaURL);
 const walletKeypair = loadWalletKey();
 const wallet = new Wallet(walletKeypair)
 
-const programId = new web3.PublicKey(idl.metadata.address)//"23UbaEAHYvXWG3Af7BeVVsSDHfS3HcxHiWqSGrZR7S86")
+const programId = new web3.PublicKey("23UbaEAHYvXWG3Af7BeVVsSDHfS3HcxHiWqSGrZR7S86")
 const provider = new AnchorProvider(connection, wallet, {})
 const program = new Program<BbNft>(IDL, programId, provider)
 
@@ -32,9 +36,19 @@ const merkleTreeSecret = [
     7,   9, 108, 191,  36,  28, 147, 221,   8
 ]
 // public key: CWJGT52bvc1zhfuEPvYMc7Lhfpax36WAuL9xZr2h6prj
-
-const merkleTreeKeypair = Keypair.fromSecretKey(new Uint8Array(merkleTreeSecret))
+const merkleTreeKeypair = keypairFromSecret(merkleTreeSecret)
 const merkleTree = merkleTreeKeypair.publicKey
+
+const nftCollectionSecret = [
+    107, 133, 249,  17,  87, 242, 88,  24,  55, 201, 123,
+    150, 173,  88, 181, 217, 112, 54,   1, 117, 194,  35,
+    124,  21,  77,  44, 186, 147, 80, 184, 247,  35, 191,
+    255, 116,  58,  15,  56, 184, 97,  34, 181,   0,   2,
+    110, 182, 185, 184, 212, 204, 67, 109, 167, 164, 193,
+    108, 200,  16,  94, 232,  21, 34,   5, 225
+]
+// public key: DvUo7hWPfw76yGdmAKdJqSVQbvKYNqV5V5bxtKBGXHHa
+const nftCollectionKeypairSigner = keypairSignerFromSecret(nftCollectionSecret)
 
 const [treeConfig] = PublicKey.findProgramAddressSync(
     [merkleTree.toBuffer()],
@@ -49,11 +63,21 @@ const [treeOwner] = PublicKey.findProgramAddressSync(
     program.programId
 );
 
-
 const depthSizePair: ValidDepthSizePair = {
     maxDepth: 3,
     maxBufferSize: 8,
 };
+
+async function createCollection(collectionMint: KeypairSigner) {
+    const txSig = await createNft(umi, {
+        mint: collectionMint,
+        name: "NY Homes",
+        uri: "https://nftcalendar.io/storage/uploads/2021/12/02/5_1202202103451761a8414d49b7d.png",
+        sellerFeeBasisPoints: percentAmount(7.5),
+        isCollection: true
+    }).sendAndConfirm(umi)
+    console.log({txSig: txSig})
+}
 
 async function createTree() {
     // const treeAccTxSig = await createMerkleTreeAccount(provider, merkleTreeKeypair, depthSizePair)
@@ -72,13 +96,14 @@ async function createTree() {
     console.log({treeTxSig})
 }
 
-async function createMint() {
+async function mintNft() {
    const createMintSig = await program.methods.mintCnft("Kick House", "KH", "https://nftcalendar.io/storage/uploads/2021/12/02/5_1202202103451761a8414d49b7d.png")
        .accounts({
            signer: wallet.publicKey,
            treeConfig,
            merkleTree,
            treeOwner,
+           nftCollection: nftCollectionKeypairSigner.publicKey,
            mplBubblegumProgram: MPL_BUBBLEGUM_PROGRAM_ID,
            logWrapper: SPL_NOOP_PROGRAM_ID,
            compressionProgram: SPL_ACCOUNT_COMPRESSION_PROGRAM_ID
@@ -92,10 +117,13 @@ async function fetchCNFTs() {
 }
 
 async function main() {
+    // await createCollection(nftCollectionKeypairSigner)
     // await createTree()
-    // await createMint()
-    //await fetchCNFTs()
-    const value = await umi.rpc.getAsset(publicKey("gxZCb7n2BU45D41pawA1mTwZJkgQCbicdZBkW7G56hM"))
+    // await mintNft()
+    await fetchCNFTs()
+
+    //fetch asset by leaf id
+    const value = await umi.rpc.getAsset(publicKey("4cVTwrXyH9qsRcf74K9EE7Ais1hAeMFFJ5MUou9mvX7V"))
     console.log(value)
 }
 

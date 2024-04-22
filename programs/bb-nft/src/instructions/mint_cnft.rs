@@ -1,10 +1,15 @@
 use anchor_lang::prelude::*;
 use mpl_bubblegum::instructions::MintV1CpiBuilder;
-use mpl_bubblegum::types::{MetadataArgs, TokenProgramVersion, TokenStandard};
+use mpl_bubblegum::types::{Collection, MetadataArgs, TokenProgramVersion, TokenStandard};
 use spl_account_compression::{program::SplAccountCompression, Noop};
 use crate::{MplBubblegum};
 
 pub fn mint_cnft(ctx: Context<MintCNFT>, name: String, symbol: String, uri: String) -> Result<()> {
+    let collection: Collection = Collection {
+        verified: false,
+        key: ctx.accounts.nft_collection.key(),
+    };
+
     let metadata = MetadataArgs {
         name,
         uri,
@@ -15,7 +20,7 @@ pub fn mint_cnft(ctx: Context<MintCNFT>, name: String, symbol: String, uri: Stri
         seller_fee_basis_points: 500,
         token_program_version: TokenProgramVersion::Original,
         token_standard: Some(TokenStandard::NonFungible),
-        collection: None,
+        collection: Some(collection),
         uses: None,
         creators: vec![]
     };
@@ -55,6 +60,8 @@ pub struct MintCNFT<'info> {
     )]
     /// CHECK: This account used as a signing PDA only
     pub tree_owner: UncheckedAccount<'info>,
+    /// CHECK: This is for collection
+    pub nft_collection: UncheckedAccount<'info>,
     pub mpl_bubblegum_program: Program<'info, MplBubblegum>,
     pub log_wrapper: Program<'info, Noop>,
     pub compression_program: Program<'info, SplAccountCompression>,
