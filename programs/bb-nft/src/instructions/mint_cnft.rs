@@ -20,11 +20,11 @@ pub fn mint_cnft(ctx: Context<MintCNFT>, name: String, symbol: String, uri: Stri
         creators: vec![]
     };
 
-    MintV1CpiBuilder::new(&ctx.accounts.mpl_bubble_gum)
+    MintV1CpiBuilder::new(&ctx.accounts.mpl_bubblegum_program)
         .tree_config(&ctx.accounts.tree_config)
         .leaf_owner(&ctx.accounts.signer)
         .leaf_delegate(&ctx.accounts.signer)
-        .merkle_tree(&ctx.accounts.merkel_tree)
+        .merkle_tree(&ctx.accounts.merkle_tree)
         .payer(&ctx.accounts.signer)
         .tree_creator_or_delegate(&ctx.accounts.tree_owner)
         .log_wrapper(&ctx.accounts.log_wrapper)
@@ -33,7 +33,7 @@ pub fn mint_cnft(ctx: Context<MintCNFT>, name: String, symbol: String, uri: Stri
         .metadata(metadata)
         .invoke_signed(&[&[
             b"tree_owner",
-            ctx.accounts.merkel_tree.key().as_ref(),
+            ctx.accounts.merkle_tree.key().as_ref(),
             &[ctx.bumps.tree_owner]
         ]])?;
     Ok(())
@@ -48,14 +48,14 @@ pub struct MintCNFT<'info> {
     pub tree_config: UncheckedAccount<'info>,
     #[account(mut)]
     /// CHECK: This account is modified in the downstream program.
-    pub merkel_tree: UncheckedAccount<'info>,
+    pub merkle_tree: UncheckedAccount<'info>,
     #[account(
-        seeds = [b"tree_owner", merkel_tree.key().as_ref()],
+        seeds = [b"tree_owner", merkle_tree.key().as_ref()],
         bump
     )]
     /// CHECK: This account used as a signing PDA only
     pub tree_owner: UncheckedAccount<'info>,
-    pub mpl_bubble_gum: Program<'info, MplBubblegum>,
+    pub mpl_bubblegum_program: Program<'info, MplBubblegum>,
     pub log_wrapper: Program<'info, Noop>,
     pub compression_program: Program<'info, SplAccountCompression>,
     pub system_program: Program<'info, System>
