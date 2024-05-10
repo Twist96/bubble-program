@@ -25,4 +25,13 @@ pub mod bb_nft {
     pub fn mint_cnft(ctx: Context<MintCNFT>, name: String, symbol: String, uri: String) -> Result<()> {
         instructions::mint_cnft(ctx, name, symbol, uri)
     }
+
+    pub fn burn_cnft<'info>(ctx: Context<'_, '_, '_, 'info, BurnCNFT<'info>>,
+                     root: [u8; 32],
+                     data_hash: [u8; 32],
+                     creator_hash: [u8; 32],
+                     nonce: u64,
+                     index: u32) -> Result<()> {
+        instructions::burn_cnft(ctx, root, data_hash, creator_hash, nonce, index)
+    }
 }
