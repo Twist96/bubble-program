@@ -1,5 +1,6 @@
 mod instructions;
 mod state;
+mod constants;
 
 use anchor_lang::prelude::*;
 use crate::instructions::*;
@@ -33,5 +34,9 @@ pub mod bb_nft {
                      nonce: u64,
                      index: u32) -> Result<()> {
         instructions::burn_cnft(ctx, root, data_hash, creator_hash, nonce, index)
+    }
+
+    pub fn lock_fund(ctx: Context<LockFund>, amount: u64) -> Result<()> {
+        instructions::lock_fund(ctx, amount)
     }
 }

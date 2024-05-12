@@ -41,6 +41,7 @@ pub fn mint_cnft(ctx: Context<MintCNFT>, name: String, symbol: String, uri: Stri
             ctx.accounts.merkle_tree.key().as_ref(),
             &[ctx.bumps.tree_owner]
         ]])?;
+
     Ok(())
 }
 
@@ -62,6 +63,7 @@ pub struct MintCNFT<'info> {
     pub tree_owner: UncheckedAccount<'info>,
     /// CHECK: This is for collection
     pub nft_collection: UncheckedAccount<'info>,
+
     pub mpl_bubblegum_program: Program<'info, MplBubblegum>,
     pub log_wrapper: Program<'info, Noop>,
     pub compression_program: Program<'info, SplAccountCompression>,
