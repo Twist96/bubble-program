@@ -75,4 +75,13 @@ describe("bb-nft", () => {
             .rpc()
         console.log({txSig})
     });
+
+    // it.only("should burn nft", async () => {
+    //     const assetProof = await anchor.getProvider().get
+    //     let burnTxSig = await program.methods.burnCnft()
+    //         .accounts({})
+    //         .signers([payer.payer])
+    //         .rpc()
+    //     console.log({burnTxSig})
+    // })
 });
