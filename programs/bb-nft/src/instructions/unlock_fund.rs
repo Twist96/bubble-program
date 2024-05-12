@@ -3,25 +3,23 @@ use anchor_spl::token::{Mint, Token, transfer, Transfer, TokenAccount};
 use crate::constants::*;
 
 #[derive(Accounts)]
-pub struct LockFund<'info> {
+pub struct UnlockFund<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
 
     /// CHECK: should be vetted from front end
+    /// ensure this nft is owned by the signer
     pub nft: UncheckedAccount<'info>,
 
     #[account(
-        mut
+    mut
     )]
     pub signer_usd_account: Account<'info, TokenAccount>,
 
     #[account(
-        init_if_needed,
+        mut,
         seeds = [constants::NFT_USD_VAULT, nft.key.as_ref()],
         bump,
-        payer = signer,
-        token::mint = usd_mint,
-        token::authority = usd_vault
     )]
     pub usd_vault: Account<'info, TokenAccount>,
 
@@ -30,19 +28,20 @@ pub struct LockFund<'info> {
     pub token_program: Program<'info, Token>
 }
 
-pub fn lock_fund(ctx: Context<LockFund>, amount: u64) -> Result<()> {
-    //transfer fund
+pub fn unlock_fund(ctx: Context<UnlockFund>) -> Result<()> {
+    //nft should be burnt first
+    //transfer fund out of vault
+    let signer: &[&[&[u8]]] = &[&[constants::NFT_USD_VAULT, ctx.accounts.nft.key.as_ref(), &[ctx.bumps.usd_vault]]];
     transfer(
-        CpiContext::new(
+        CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
             Transfer {
-                from: ctx.accounts.signer_usd_account.to_account_info(),
-                to: ctx.accounts.usd_vault.to_account_info(),
-                authority: ctx.accounts.signer.to_account_info()
+                from: ctx.accounts.usd_vault.to_account_info(),
+                to: ctx.accounts.signer_usd_account.to_account_info(),
+                authority: ctx.accounts.usd_vault.to_account_info()
             },
+            signer
         ),
-        amount
+        ctx.accounts.usd_vault.amount
     )
-
-    //update nft: set lock fund to true
 }
