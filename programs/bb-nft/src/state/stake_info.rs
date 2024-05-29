@@ -7,4 +7,5 @@ pub struct StakeInfo {
 
 impl StakeInfo {
     pub const SEED: &'static str = "stake_info";
+    pub const SPACE: usize = 32 + 8;
 }

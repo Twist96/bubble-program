@@ -26,7 +26,7 @@ pub struct UnlockFund<'info> {
 
     #[account(
         mut,
-        seeds = [nft.key.as_ref()],
+        seeds = [StakeInfo::SEED.as_ref(), nft.key.as_ref()],
         bump
     )]
     pub stake_info: Account<'info, StakeInfo>,

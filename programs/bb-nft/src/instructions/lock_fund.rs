@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, transfer, Transfer, TokenAccount};
 use crate::constants::*;
+use crate::state::StakeInfo;
 
 #[derive(Accounts)]
 pub struct LockFund<'info> {
@@ -25,6 +26,15 @@ pub struct LockFund<'info> {
     )]
     pub usd_vault: Account<'info, TokenAccount>,
 
+    #[account(
+        init_if_needed,
+        seeds = [StakeInfo::SEED.as_ref(), nft.key.as_ref()],
+        bump,
+        space = StakeInfo::SPACE,
+        payer = signer
+    )]
+    pub stake_info: Account<'info, StakeInfo>,
+
     pub usd_mint: Account<'info, Mint>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>
@@ -42,7 +52,8 @@ pub fn lock_fund(ctx: Context<LockFund>, amount: u64) -> Result<()> {
             },
         ),
         amount
-    )
+    )?;
 
-    //update nft: set lock fund to true
+    ctx.accounts.stake_info.owner = ctx.accounts.signer.key();
+    Ok(())
 }
