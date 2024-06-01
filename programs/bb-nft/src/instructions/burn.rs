@@ -1,8 +1,11 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token::{Token, TokenAccount};
 use mpl_bubblegum::instructions::BurnCpiBuilder;
 use spl_account_compression::Noop;
 use spl_account_compression::program::SplAccountCompression;
 use crate::MplBubblegum;
+use crate::state::{StakeInfo, StakeInfoAccount};
+use crate::constants::*;
 
 #[derive(Accounts)]
 pub struct BurnCNFT<'info> {
@@ -13,12 +16,37 @@ pub struct BurnCNFT<'info> {
     /// CHECKED: this account is checked in the instruction
     pub merkle_tree: UncheckedAccount<'info>,
 
+    #[account(
+        mut,
+        seeds = [StakeInfo::SEED.as_ref(), cnft.key.as_ref()],
+        bump
+    )]
+    pub stake_info: Account<'info, StakeInfo>,
+
+    // Todo: remember to close this account
+    #[account(
+        mut,
+        seeds = [constants::NFT_USD_VAULT, cnft.key.as_ref()],
+        bump,
+    )]
+    pub usd_vault: Account<'info, TokenAccount>,
+
+    #[account(
+        mut
+    )]
+    pub signer_usd_account: Account<'info, TokenAccount>,
+
+    /// CHECK: should be vetted from front end
+    /// ensure this nft is owned by the signer
+    pub cnft: UncheckedAccount<'info>,
+
     /// CHECKED: this account is checked in the instruction
     pub tree_config: UncheckedAccount<'info>,
     pub log_wrapper: Program<'info, Noop>,
     pub compression_program: Program<'info, SplAccountCompression>,
     pub bubblegum_program: Program<'info, MplBubblegum>,
-    pub system_program: Program<'info, System>
+    pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>
 }
 
 pub fn burn_cnft<'info>(ctx: Context<'_, '_, '_, 'info, BurnCNFT<'info>>,
@@ -47,6 +75,16 @@ pub fn burn_cnft<'info>(ctx: Context<'_, '_, '_, 'info, BurnCNFT<'info>>,
         .nonce(nonce)
         .index(index)
         .invoke()?;
+
+    //unlock fund
+    ctx.accounts.stake_info.unlock_fund(
+        ctx.bumps.usd_vault,
+        &ctx.accounts.usd_vault,
+        &ctx.accounts.signer,
+        &ctx.accounts.signer_usd_account,
+        &ctx.accounts.cnft,
+        &ctx.accounts.token_program
+    )?;
 
     Ok(())
 }

@@ -50,8 +50,4 @@ pub mod bb_nft {
     pub fn lock_fund(ctx: Context<LockFund>, amount: u64) -> Result<()> {
         instructions::lock_fund(ctx, amount)
     }
-
-    pub fn unlock_fund(ctx: Context<UnlockFund>) -> Result<()> {
-        instructions::unlock_fund(ctx)
-    }
 }

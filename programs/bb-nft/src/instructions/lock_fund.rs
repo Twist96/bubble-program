@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token, transfer, Transfer, TokenAccount};
+use anchor_spl::token::{Mint, Token, TokenAccount};
 use crate::constants::*;
-use crate::state::StakeInfo;
+use crate::state::{StakeInfo, StakeInfoAccount};
 
 #[derive(Accounts)]
 pub struct LockFund<'info> {
@@ -41,19 +41,11 @@ pub struct LockFund<'info> {
 }
 
 pub fn lock_fund(ctx: Context<LockFund>, amount: u64) -> Result<()> {
-    //transfer fund
-    transfer(
-        CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.signer_usd_account.to_account_info(),
-                to: ctx.accounts.usd_vault.to_account_info(),
-                authority: ctx.accounts.signer.to_account_info()
-            },
-        ),
-        amount
-    )?;
-
-    ctx.accounts.stake_info.owner = ctx.accounts.signer.key();
-    Ok(())
+    ctx.accounts.stake_info.lock_fund(
+        amount,
+        &ctx.accounts.signer,
+        &ctx.accounts.signer_usd_account,
+        &ctx.accounts.usd_vault,
+        &ctx.accounts.token_program
+    )
 }
