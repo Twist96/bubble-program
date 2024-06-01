@@ -23,8 +23,8 @@ pub mod bb_nft {
         instructions::create_tree(ctx, max_depth, max_buffer_size)
     }
 
-    pub fn mint_cnft(ctx: Context<MintCNFT>, name: String, symbol: String, uri: String) -> Result<()> {
-        instructions::mint_cnft(ctx, name, symbol, uri)
+    pub fn mint_cnft(ctx: Context<MintCNFT>, symbol: String) -> Result<()> {
+        instructions::mint_cnft(ctx, symbol)
     }
 
     pub fn burn_cnft<'info>(ctx: Context<'_, '_, '_, 'info, BurnCNFT<'info>>,

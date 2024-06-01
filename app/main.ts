@@ -164,19 +164,19 @@ async function fetchCNFTs() {
 }
 
 async function main() {
-    const nftId = "4cVTwrXyH9qsRcf74K9EE7Ais1hAeMFFJ5MUou9mvX7V"
+    const nftId = "2Xc6tWR8QmTpg5K5opXdCpHbaHFgrd1dnC9Mh3giX9vs"
 
     // await createCollection(nftCollectionKeypairSigner)
     // await createTree()
     // await mintNft()
     // await fetchCNFTs()
 
-    const burnTx = await burnNFT(nftId)
-    console.log({burnTx})
+    // const burnTx = await burnNFT(nftId)
+    // console.log({burnTx})
 
     //fetch asset by leaf id
-    // const value = await umi.rpc.getAsset(publicKey(nftId))
-    // console.log({value: value})
+    const asset = await umi.rpc.getAsset(publicKey(nftId))
+    console.log({asset})
 }
 
 main()

@@ -3,16 +3,49 @@ use mpl_bubblegum::instructions::MintV1CpiBuilder;
 use mpl_bubblegum::types::{Collection, MetadataArgs, TokenProgramVersion, TokenStandard};
 use spl_account_compression::{program::SplAccountCompression, Noop};
 use crate::{MplBubblegum};
+use crate::state::*;
 
-pub fn mint_cnft(ctx: Context<MintCNFT>, name: String, symbol: String, uri: String) -> Result<()> {
+#[derive(Accounts)]
+pub struct MintCNFT<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    #[account(mut)]
+
+    /// CHECK: This account is modified in the downstream program
+    pub asset_info: Account<'info, Asset>,
+    /// CHECK: This account is modified in the downstream program.
+    pub tree_config: UncheckedAccount<'info>,
+    #[account(mut)]
+    /// CHECK: This account is modified in the downstream program.
+    pub merkle_tree: UncheckedAccount<'info>,
+    #[account(
+    seeds = [b"tree_owner", merkle_tree.key().as_ref()],
+    bump
+    )]
+    /// CHECK: This account used as a signing PDA only
+    pub tree_owner: UncheckedAccount<'info>,
+    /// CHECK: This is for collection
+    pub nft_collection: UncheckedAccount<'info>,
+
+    pub mpl_bubblegum_program: Program<'info, MplBubblegum>,
+    pub log_wrapper: Program<'info, Noop>,
+    pub compression_program: Program<'info, SplAccountCompression>,
+    pub system_program: Program<'info, System>
+}
+
+pub fn mint_cnft(ctx: Context<MintCNFT>, symbol: String) -> Result<()> {
+
+    //Mint asset here
     let collection: Collection = Collection {
         verified: false,
         key: ctx.accounts.nft_collection.key(),
     };
 
+    let name = &ctx.accounts.asset_info.name;
+    let uri = &ctx.accounts.asset_info.metadata_url;
     let metadata = MetadataArgs {
-        name,
-        uri,
+        name: name.to_string(),
+        uri: uri.to_string(),
         symbol,
         edition_nonce: None,
         is_mutable: true,
@@ -43,31 +76,4 @@ pub fn mint_cnft(ctx: Context<MintCNFT>, name: String, symbol: String, uri: Stri
         ]])?;
 
     Ok(())
-}
-
-#[derive(Accounts)]
-pub struct MintCNFT<'info> {
-    #[account(mut)]
-    pub signer: Signer<'info>,
-    #[account(mut)]
-    /// CHECK: This account is modified in the downstream program.
-    pub tree_config: UncheckedAccount<'info>,
-    #[account(mut)]
-    /// CHECK: This account is modified in the downstream program.
-    pub merkle_tree: UncheckedAccount<'info>,
-    #[account(
-        seeds = [b"tree_owner", merkle_tree.key().as_ref()],
-        bump
-    )]
-    /// CHECK: This account used as a signing PDA only
-    pub tree_owner: UncheckedAccount<'info>,
-    /// CHECK: This is for collection
-    pub nft_collection: UncheckedAccount<'info>,
-
-    pub mpl_bubblegum_program: Program<'info, MplBubblegum>,
-    pub log_wrapper: Program<'info, Noop>,
-    pub compression_program: Program<'info, SplAccountCompression>,
-    pub system_program: Program<'info, System>
-
-
 }
