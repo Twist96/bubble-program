@@ -12,7 +12,7 @@ pub struct MintCNFT<'info> {
     #[account(mut)]
 
     /// CHECK: This account is modified in the downstream program
-    pub asset_info: AccountInfo<'info>,//Account<'info, Asset>,
+    pub asset_info: AccountInfo<'info>,
     /// CHECK: This account is modified in the downstream program.
     pub tree_config: UncheckedAccount<'info>,
     #[account(mut)]
@@ -40,15 +40,10 @@ pub fn mint_cnft(ctx: Context<MintCNFT>, symbol: String) -> Result<()> {
         key: ctx.accounts.nft_collection.key(),
     };
 
-    let asset_info = &ctx.accounts.asset_info;
-    let asset_info_data = &mut &**asset_info.try_borrow_data()?;
-    let asset = Asset::try_deserialize(asset_info_data).unwrap();
-    let name = asset.name;
-    let uri = asset.metadata_url;
-
+    let asset = Asset::from_account_info(&ctx.accounts.asset_info);
     let metadata = MetadataArgs {
-        name: name.to_string(),
-        uri: uri.to_string(),
+        name: asset.name.to_string(),
+        uri: asset.metadata_url.to_string(),
         symbol,
         edition_nonce: None,
         is_mutable: true,

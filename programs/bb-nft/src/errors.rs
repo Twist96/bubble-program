@@ -2,6 +2,9 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum Errors {
+    #[msg("Insufficient token balance")]
+    InSufficientToken,
+
     #[msg("Insufficient sol balance")]
     InSufficientSol,
 

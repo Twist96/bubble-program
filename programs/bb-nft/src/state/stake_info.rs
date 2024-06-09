@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{TokenAccount, transfer, Transfer, Token};
 use crate::constants::constants;
+use crate::errors::Errors;
 
 #[account]
 pub struct StakeInfo {
@@ -37,6 +38,10 @@ impl<'info> StakeInfoAccount<'info> for Account<'info, StakeInfo> {
                  to: &Account<'info, TokenAccount>,
                  token_program: &Program<'info, Token>
     ) -> Result<()> {
+        if from.amount < amount {
+            return Err(Errors::InSufficientToken.into())
+        }
+
         transfer(
             CpiContext::new(
                 token_program.to_account_info(),

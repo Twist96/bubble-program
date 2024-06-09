@@ -60,7 +60,7 @@ pub mod bb_nft {
         instructions::transfer_cnft(ctx, root, data_hash, creator_hash, nonce, index)
     }
 
-    pub fn lock_fund(ctx: Context<LockFund>, amount: u64) -> Result<()> {
-        instructions::lock_fund(ctx, amount)
+    pub fn lock_fund(ctx: Context<LockFund>) -> Result<()> {
+        instructions::lock_fund(ctx)
     }
 }

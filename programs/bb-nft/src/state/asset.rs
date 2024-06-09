@@ -17,3 +17,11 @@ pub enum Reputation {
     Medium,
     High,
 }
+
+impl Asset {
+    pub fn from_account_info(account_info: &AccountInfo) -> Self {
+        let asset_info_data = &mut &**account_info.try_borrow_data().unwrap();
+        let asset = Asset::try_deserialize(asset_info_data).unwrap();
+        return asset
+    }
+}

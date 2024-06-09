@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use crate::constants::*;
 use crate::errors::Errors;
-use crate::state::{StakeInfo, StakeInfoAccount, TokenWhitelist};
+use crate::state::{Asset, StakeInfo, StakeInfoAccount, TokenWhitelist};
 
 #[derive(Accounts)]
 pub struct LockFund<'info> {
@@ -12,10 +12,13 @@ pub struct LockFund<'info> {
     /// CHECK: should be vetted from front end
     pub nft: UncheckedAccount<'info>,
 
+    /// CHECK: This account is modified in the downstream program
+    pub asset_info: AccountInfo<'info>,
+
     #[account(
         mut
     )]
-    pub signer_usd_account: Account<'info, TokenAccount>,
+    pub signer_token_account: Account<'info, TokenAccount>,
 
     #[account(
         init_if_needed,
@@ -47,12 +50,13 @@ pub struct LockFund<'info> {
     pub token_program: Program<'info, Token>
 }
 
-pub fn lock_fund(ctx: Context<LockFund>, amount: u64) -> Result<()> {
+pub fn lock_fund(ctx: Context<LockFund>) -> Result<()> {
     require!(ctx.accounts.whitelist.tokens.contains(&ctx.accounts.usd_mint.key()), Errors::TokenAlreadyWhitelisted);
+    let asset = Asset::from_account_info(&ctx.accounts.asset_info);
     ctx.accounts.stake_info.lock_fund(
-        amount,
+        asset.price,
         &ctx.accounts.signer,
-        &ctx.accounts.signer_usd_account,
+        &ctx.accounts.signer_token_account,
         &ctx.accounts.token_vault,
         &ctx.accounts.token_program
     )

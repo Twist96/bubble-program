@@ -34,7 +34,7 @@ pub struct BurnCNFT<'info> {
     #[account(
         mut
     )]
-    pub signer_usd_account: Account<'info, TokenAccount>,
+    pub signer_token_account: Account<'info, TokenAccount>,
 
     /// CHECK: should be vetted from front end
     /// ensure this nft is owned by the signer
@@ -81,7 +81,7 @@ pub fn burn_cnft<'info>(ctx: Context<'_, '_, '_, 'info, BurnCNFT<'info>>,
         ctx.bumps.token_vault,
         &ctx.accounts.token_vault,
         &ctx.accounts.signer,
-        &ctx.accounts.signer_usd_account,
+        &ctx.accounts.signer_token_account,
         &ctx.accounts.cnft,
         &ctx.accounts.token_program
     )?;
