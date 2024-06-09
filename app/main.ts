@@ -93,10 +93,11 @@ async function createTree() {
     console.log({treeTxSig})
 }
 
-async function mintNft() {
-   const createMintSig = await program.methods.mintCnft("Kick House", "KH", "https://nftcalendar.io/storage/uploads/2021/12/02/5_1202202103451761a8414d49b7d.png")
+async function mintNft(asset: PublicKey) {
+   const createMintSig = await program.methods.mintCnft("KH")
        .accounts({
            signer: wallet.publicKey,
+           assetInfo: asset,
            treeConfig,
            merkleTree,
            treeOwner,
@@ -168,15 +169,16 @@ async function main() {
 
     // await createCollection(nftCollectionKeypairSigner)
     // await createTree()
-    // await mintNft()
+    let asset = new PublicKey("55p8yn41UVBunGNYXfpe4sdJzLhPCMppT5UzS2PFeaRS");
+    await mintNft(asset)
     // await fetchCNFTs()
 
     // const burnTx = await burnNFT(nftId)
     // console.log({burnTx})
 
     //fetch asset by leaf id
-    const asset = await umi.rpc.getAsset(publicKey(nftId))
-    console.log({asset})
+    // const asset = await umi.rpc.getAsset(publicKey(nftId))
+    // console.log({asset})
 }
 
 main()
@@ -189,3 +191,5 @@ main()
 .finally(() => {
     console.log("DONE")
 })
+
+// mintCnft("Kick House", "KH", "https://nftcalendar.io/storage/uploads/2021/12/02/5_1202202103451761a8414d49b7d.png")

@@ -5,6 +5,7 @@ skipPreflight = true
 pkg = { version = "^0.1.14", features = ["devnet"] }
 [programs.localnet]
 bb_nft = "23UbaEAHYvXWG3Af7BeVVsSDHfS3HcxHiWqSGrZR7S86"
+#asset_oracle = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
 [registry]
 url = "https://api.apr.dev"

@@ -1,6 +1,7 @@
 mod instructions;
 mod state;
 mod constants;
+mod errors;
 
 use anchor_lang::prelude::*;
 use crate::instructions::*;
@@ -19,8 +20,20 @@ impl Id for MplBubblegum {
 pub mod bb_nft {
     use super::*;
 
+    pub fn init(ctx: Context<Init>) -> Result<()> {
+        instructions::init(ctx)
+    }
+
     pub fn create_tree(ctx: Context<CreateTree>, max_depth: u32, max_buffer_size: u32) -> Result<()> {
         instructions::create_tree(ctx, max_depth, max_buffer_size)
+    }
+
+    pub fn whitelist_token(ctx: Context<WhitelistToken>) -> Result<()> {
+        instructions::whitelist_token(ctx)
+    }
+
+    pub fn delist_token(ctx: Context<DelistToken>) -> Result<()> {
+        instructions::delist_token(ctx)
     }
 
     pub fn mint_cnft(ctx: Context<MintCNFT>, symbol: String) -> Result<()> {

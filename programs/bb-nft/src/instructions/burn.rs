@@ -29,7 +29,7 @@ pub struct BurnCNFT<'info> {
         seeds = [constants::NFT_USD_VAULT, cnft.key.as_ref()],
         bump,
     )]
-    pub usd_vault: Account<'info, TokenAccount>,
+    pub token_vault: Account<'info, TokenAccount>,
 
     #[account(
         mut
@@ -78,8 +78,8 @@ pub fn burn_cnft<'info>(ctx: Context<'_, '_, '_, 'info, BurnCNFT<'info>>,
 
     //unlock fund
     ctx.accounts.stake_info.unlock_fund(
-        ctx.bumps.usd_vault,
-        &ctx.accounts.usd_vault,
+        ctx.bumps.token_vault,
+        &ctx.accounts.token_vault,
         &ctx.accounts.signer,
         &ctx.accounts.signer_usd_account,
         &ctx.accounts.cnft,

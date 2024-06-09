@@ -22,9 +22,9 @@ pub struct LockFund<'info> {
         bump,
         payer = signer,
         token::mint = usd_mint,
-        token::authority = usd_vault
+        token::authority = token_vault
     )]
-    pub usd_vault: Account<'info, TokenAccount>,
+    pub token_vault: Account<'info, TokenAccount>,
 
     #[account(
         init_if_needed,
@@ -45,7 +45,7 @@ pub fn lock_fund(ctx: Context<LockFund>, amount: u64) -> Result<()> {
         amount,
         &ctx.accounts.signer,
         &ctx.accounts.signer_usd_account,
-        &ctx.accounts.usd_vault,
+        &ctx.accounts.token_vault,
         &ctx.accounts.token_program
     )
 }
