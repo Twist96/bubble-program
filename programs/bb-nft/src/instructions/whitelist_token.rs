@@ -12,11 +12,12 @@ pub struct WhitelistToken<'info> {
         bump
     )]
     pub whitelist: Account<'info, TokenWhitelist>,
-    pub mint: Account<'info, Mint>
+    pub mint: Account<'info, Mint>,
+    pub system_program: Program<'info, System>
 }
 
 pub fn whitelist_token(ctx: Context<WhitelistToken>) -> Result<()> {
-    ctx.accounts.whitelist.insert_token(&ctx.accounts.mint);
-    Ok(())
+    ctx.accounts.whitelist.insert_token(&ctx.accounts.mint, &ctx.accounts.signer,
+                                        &ctx.accounts.system_program)
 }
 

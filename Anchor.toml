@@ -18,19 +18,22 @@ wallet = "/Users/matthewchukwuemeka/.config/solana/id.json"
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 
 [test.validator]
-bind_address = "0.0.0.0"
-url = "https://api.mainnet-beta.solana.com"
-ledger = ".anchor/test-ledger"
-rpc_port = 8899
+#bind_address = "0.0.0.0"
+url = "https://api.devnet-beta.solana.com"
+#ledger = ".anchor/test-ledger"
+#rpc_port = 8899
 
-[[test.validator.clone]]
-address = "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV"
-filename = "clones/noob.json"
+#[[test.validator.clone]]
+#address = "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV"
+#filename = "clones/noob.json"
+#
+#[[test.validator.clone]]
+#address = "cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK"
+#filename = "clones/compression.json"
+#
+#[[test.validator.clone]]
+#address = "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY"
+#filename = "clones/BGUMA.json"
 
-[[test.validator.clone]]
-address = "cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK"
-filename = "clones/compression.json"
-
-[[test.validator.clone]]
-address = "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY"
-filename = "clones/BGUMA.json"
+[[test.vaidator.clone]]
+address = "GwtTWkdrbpn1JgXhsmzCpNhQpgph6FMMWg3ecU8nYUjD"

@@ -1,7 +1,8 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use crate::constants::*;
-use crate::state::{StakeInfo, StakeInfoAccount};
+use crate::errors::Errors;
+use crate::state::{StakeInfo, StakeInfoAccount, TokenWhitelist};
 
 #[derive(Accounts)]
 pub struct LockFund<'info> {
@@ -35,12 +36,19 @@ pub struct LockFund<'info> {
     )]
     pub stake_info: Account<'info, StakeInfo>,
 
+    #[account(
+        seeds = [TokenWhitelist::SEED.as_bytes()],
+        bump
+    )]
+    pub whitelist: Account<'info, TokenWhitelist>,
+
     pub usd_mint: Account<'info, Mint>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>
 }
 
 pub fn lock_fund(ctx: Context<LockFund>, amount: u64) -> Result<()> {
+    require!(ctx.accounts.whitelist.tokens.contains(&ctx.accounts.usd_mint.key()), Errors::TokenAlreadyWhitelisted);
     ctx.accounts.stake_info.lock_fund(
         amount,
         &ctx.accounts.signer,
