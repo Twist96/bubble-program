@@ -9,10 +9,9 @@ use crate::state::*;
 pub struct MintCNFT<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
-    #[account(mut)]
-
     /// CHECK: This account is modified in the downstream program
     pub asset_info: AccountInfo<'info>,
+    #[account(mut)]
     /// CHECK: This account is modified in the downstream program.
     pub tree_config: UncheckedAccount<'info>,
     #[account(mut)]

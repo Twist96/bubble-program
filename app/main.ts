@@ -93,8 +93,37 @@ async function createTree() {
     console.log({treeTxSig})
 }
 
+const whitelist_tokens_pubkey = PublicKey.findProgramAddressSync([
+    Buffer.from("token_whitelist")
+], program.programId)[0]
+
+async function init() {
+    return await program.methods.init()
+        .accounts({
+            signer: wallet.publicKey,
+            whitelist: whitelist_tokens_pubkey,
+        }).rpc()
+}
+async function whitelist_token(token: PublicKey) {
+    return await program.methods.whitelistToken()
+        .accounts({
+            signer: wallet.publicKey,
+            whitelist: whitelist_tokens_pubkey,
+            mint: token,
+        }).rpc()
+}
+
+async function delist_token(token: PublicKey) {
+    return await program.methods.delistToken()
+        .accounts({
+            signer: wallet.publicKey,
+            whitelist: whitelist_tokens_pubkey,
+            mint: token
+        }).rpc()
+}
+
 async function mintNft(asset: PublicKey) {
-   const createMintSig = await program.methods.mintCnft("KH")
+   const createMintSig = await program.methods.mintCnft("COLA")
        .accounts({
            signer: wallet.publicKey,
            assetInfo: asset,
@@ -167,10 +196,19 @@ async function fetchCNFTs() {
 async function main() {
     const nftId = "2Xc6tWR8QmTpg5K5opXdCpHbaHFgrd1dnC9Mh3giX9vs"
 
+    // const init_tx = await init()
+    // console.log({init_tx})
+
+    // const bonk_token = new PublicKey("GwtTWkdrbpn1JgXhsmzCpNhQpgph6FMMWg3ecU8nYUjD")
+    // const whitelist_token_tx = await whitelist_token(bonk_token)
+    // console.log({whitelist_token_tx})
+
     // await createCollection(nftCollectionKeypairSigner)
     // await createTree()
-    let asset = new PublicKey("55p8yn41UVBunGNYXfpe4sdJzLhPCMppT5UzS2PFeaRS");
+
+    let asset = new PublicKey("9jcPQz32ZnzH3x861wXVnRPKv4wWqBJTo7XYPzFf8FUt");
     await mintNft(asset)
+
     // await fetchCNFTs()
 
     // const burnTx = await burnNFT(nftId)
@@ -179,6 +217,12 @@ async function main() {
     //fetch asset by leaf id
     // const asset = await umi.rpc.getAsset(publicKey(nftId))
     // console.log({asset})
+
+    // fetch oracle data
+    // let accounts = await connection.getParsedProgramAccounts(
+    //     new PublicKey("EP8gh6mMC4o6zzDWU8PPKyAXLHfhsHo3yti9wxtkQyTo")
+    // )
+    // console.log({accounts})
 }
 
 main()
