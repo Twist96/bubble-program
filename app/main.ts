@@ -8,10 +8,16 @@ import {
     ValidDepthSizePair
 } from "@solana/spl-account-compression";
 import {AccountMeta, PublicKey} from "@solana/web3.js";
-import {findTreeConfigPda, MPL_BUBBLEGUM_PROGRAM_ID} from "@metaplex-foundation/mpl-bubblegum";
+import {
+    findLeafAssetIdPda,
+    findTreeConfigPda,
+    MPL_BUBBLEGUM_PROGRAM_ID,
+    parseLeafFromMintToCollectionV1Transaction
+} from "@metaplex-foundation/mpl-bubblegum";
 import {keypairFromSecret, keypairSignerFromSecret, loadWalletKey, umi} from "./utils";
 import {KeypairSigner, percentAmount, publicKey, PublicKey as UmiPk} from "@metaplex-foundation/umi";
 import {createNft} from "@metaplex-foundation/mpl-token-metadata";
+import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
 import bs58 from 'bs58';
 
 let solanaURL = "https://api.devnet.solana.com"
@@ -24,6 +30,7 @@ const programId = new web3.PublicKey("23UbaEAHYvXWG3Af7BeVVsSDHfS3HcxHiWqSGrZR7S
 const provider = new AnchorProvider(connection, wallet, {})
 const program = new Program<BbNft>(IDL, programId, provider)
 
+const bonk_token = new PublicKey("GwtTWkdrbpn1JgXhsmzCpNhQpgph6FMMWg3ecU8nYUjD")
 const merkleTreeSecret = [
     233,  76, 207, 113,  59, 217, 235, 251,  77, 135,   3,
     180, 171, 163,  93, 237, 210, 187,  59,  74, 185,   7,
@@ -138,6 +145,32 @@ async function mintNft(asset: PublicKey) {
     console.log({createMintSig})
 }
 
+async function derive_cnft_id(mintSig: string) {
+    let sig = Buffer.from(mintSig)
+    const leaf = await parseLeafFromMintToCollectionV1Transaction(umi, sig)
+    console.log({leaf})
+    return findLeafAssetIdPda(umi, {merkleTree: mintSig as UmiPk, leafIndex: leaf.nonce})
+}
+
+const cnft_pubkey = new PublicKey("24GnX7R9rPsxpoUb73nKDtdCwWwFs81gURJVVfnzhU2L")
+async function lock_cnft(cnft: PublicKey, assetInfo: PublicKey) {
+    const signerBonkAta = await getOrCreateAssociatedTokenAccount(connection, wallet.payer, bonk_token, wallet.publicKey, false, "confirmed");
+    const cnftStakeVault = PublicKey.findProgramAddressSync([Buffer.from("stake_vault"), cnft.toBuffer()], programId)[0];
+    const stakeInfo = PublicKey.findProgramAddressSync([Buffer.from("stake_info"), cnft.toBuffer()], programId)[0];
+
+    return await program.methods.lockFund()
+        .accounts({
+            signer: wallet.publicKey,
+            cnft,
+            assetInfo,
+            signerTokenAta: signerBonkAta.address,
+            cnftStakeVault,
+            stakeInfo,
+            whitelist: whitelist_tokens_pubkey,
+            txTokenMint: bonk_token
+        }).rpc()
+}
+
 async function burnNFT(asset: string) {
     const assetId = publicKey(asset)
     const assetProof = await umi.rpc.getAssetProof(assetId)
@@ -199,15 +232,17 @@ async function main() {
     // const init_tx = await init()
     // console.log({init_tx})
 
-    // const bonk_token = new PublicKey("GwtTWkdrbpn1JgXhsmzCpNhQpgph6FMMWg3ecU8nYUjD")
+
     // const whitelist_token_tx = await whitelist_token(bonk_token)
     // console.log({whitelist_token_tx})
 
     // await createCollection(nftCollectionKeypairSigner)
     // await createTree()
 
-    let asset = new PublicKey("9jcPQz32ZnzH3x861wXVnRPKv4wWqBJTo7XYPzFf8FUt");
-    await mintNft(asset)
+    let assetInfo = new PublicKey("9jcPQz32ZnzH3x861wXVnRPKv4wWqBJTo7XYPzFf8FUt");
+    // await mintNft(assetInfo)
+    const lock_tx = await lock_cnft(cnft_pubkey, assetInfo)
+    console.log({lock_tx})
 
     // await fetchCNFTs()
 
@@ -223,6 +258,10 @@ async function main() {
     //     new PublicKey("EP8gh6mMC4o6zzDWU8PPKyAXLHfhsHo3yti9wxtkQyTo")
     // )
     // console.log({accounts})
+
+    /// can't get this to work at the moment
+    // const cnft_id = await derive_cnft_id("63Q5DJ6Fr264915mE3i8CL9QJ8NGZnSjJRuK4XoCQ1jx6LekreR6hwpoQA8WDFGD7tZVGAfVPmqUVtpnUUtExbpE")
+    // console.log({cnft_id})
 }
 
 main()

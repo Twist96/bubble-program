@@ -26,7 +26,7 @@ pub struct BurnCNFT<'info> {
     // Todo: remember to close this account
     #[account(
         mut,
-        seeds = [constants::NFT_USD_VAULT, cnft.key.as_ref()],
+        seeds = [constants::STAKE_VAULT, cnft.key.as_ref()],
         bump,
     )]
     pub token_vault: Account<'info, TokenAccount>,

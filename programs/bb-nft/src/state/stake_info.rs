@@ -68,7 +68,7 @@ impl<'info> StakeInfoAccount<'info> for Account<'info, StakeInfo> {
     ) -> Result<()> {
         require_keys_eq!(self.owner, signer.key());
 
-        let signer: &[&[&[u8]]] = &[&[constants::NFT_USD_VAULT, cnft.key.as_ref(), &[usd_vault_bump]]];
+        let signer: &[&[&[u8]]] = &[&[constants::STAKE_VAULT, cnft.key.as_ref(), &[usd_vault_bump]]];
         transfer(
             CpiContext::new_with_signer(
                 token_program.to_account_info(),
