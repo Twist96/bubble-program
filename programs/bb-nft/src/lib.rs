@@ -49,17 +49,6 @@ pub mod bb_nft {
         instructions::burn_cnft(ctx, root, data_hash, creator_hash, nonce, index)
     }
 
-    pub fn transfer_cnft<'info>(
-        ctx: Context<'_, '_, '_, 'info, TransferCNFT<'info>>,
-        root: [u8; 32],
-        data_hash: [u8; 32],
-        creator_hash: [u8; 32],
-        nonce: u64,
-        index: u32
-    ) -> Result<()> {
-        instructions::transfer_cnft(ctx, root, data_hash, creator_hash, nonce, index)
-    }
-
     pub fn lock_fund(ctx: Context<LockFund>) -> Result<()> {
         instructions::lock_fund(ctx)
     }

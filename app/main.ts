@@ -197,6 +197,11 @@ async function burnNFT(asset: string) {
     const nonce = new anchor.BN(rpcAsset.compression.leaf_id)
     const index = rpcAsset.compression.leaf_id
 
+    let cnft = new PublicKey(cnft_pubkey)
+    const stakeInfo = PublicKey.findProgramAddressSync([Buffer.from("stake_info"), cnft.toBuffer()], programId)[0];
+    const cnftStakeVault = PublicKey.findProgramAddressSync([Buffer.from("stake_vault"), cnft.toBuffer()], programId)[0];
+    const signerBonkAta = await getOrCreateAssociatedTokenAccount(connection, wallet.payer, bonk_token, wallet.publicKey, false, "confirmed");
+
     return await program.methods
         .burnCnft(
             root,
@@ -207,6 +212,10 @@ async function burnNFT(asset: string) {
         )
         .accounts({
             signer: wallet.publicKey,
+            // stakeInfo,
+            // tokenVault: cnftStakeVault,
+            // signerTokenAccount: signerBonkAta.address,
+            // cnft,
             treeConfig: treeConfigPublicKey,
             merkleTree,
             logWrapper: SPL_NOOP_PROGRAM_ID,
@@ -214,10 +223,10 @@ async function burnNFT(asset: string) {
             bubblegumProgram: MPL_BUBBLEGUM_PROGRAM_ID,
             systemProgram: anchor.web3.SystemProgram.programId
         })
-        // .signers([wallet.payer])
-        // .remainingAccounts(proof)
+        .signers([wallet.payer])
+        .remainingAccounts(proof)
         .rpc({
-            skipPreflight: true
+            skipPreflight: false
         })
 }
 
@@ -241,13 +250,19 @@ async function main() {
 
     let assetInfo = new PublicKey("9jcPQz32ZnzH3x861wXVnRPKv4wWqBJTo7XYPzFf8FUt");
     // await mintNft(assetInfo)
-    const lock_tx = await lock_cnft(cnft_pubkey, assetInfo)
-    console.log({lock_tx})
+    // const lock_tx = await lock_cnft(cnft_pubkey, assetInfo)
+    // console.log({lock_tx})
+
+    // const stakeInfo = PublicKey.findProgramAddressSync(
+    //     [Buffer.from("stake_info"),
+    //         cnft_pubkey.toBuffer()], programId)[0];
+    // const stakeInfoAccount = await program.account.stakeInfo.fetch(new PublicKey(stakeInfo))
+    // console.log({assetOwner: stakeInfoAccount.owner.toString()})
 
     // await fetchCNFTs()
 
-    // const burnTx = await burnNFT(nftId)
-    // console.log({burnTx})
+    const burnTx = await burnNFT(nftId)
+    console.log({burnTx})
 
     //fetch asset by leaf id
     // const asset = await umi.rpc.getAsset(publicKey(nftId))
